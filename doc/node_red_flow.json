@@ -1,0 +1,158 @@
+[
+    {
+        "id": "7c5cc928.09cb08",
+        "type": "tab",
+        "label": "MqttTFT",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "e130e82a.dfa3f8",
+        "type": "inject",
+        "z": "7c5cc928.09cb08",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "30",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 240,
+        "y": 200,
+        "wires": [
+            [
+                "ba967665.dc61f8"
+            ]
+        ]
+    },
+    {
+        "id": "5c45e535.54f3cc",
+        "type": "mqtt out",
+        "z": "7c5cc928.09cb08",
+        "name": "",
+        "topic": "tft/text",
+        "qos": "",
+        "retain": "",
+        "broker": "9758347b.d79898",
+        "x": 670,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "ba967665.dc61f8",
+        "type": "function",
+        "z": "7c5cc928.09cb08",
+        "name": "",
+        "func": "//birthday.getFullYear();      // 1980\n//birthday.getMonth();         // 6\n//birthday.getDate();          // 31\n//birthday.getDay();           // 4\n//birthday.getHours();         // 0\n//birthday.getMinutes();       // 0\n//birthday.getSeconds();       // 0\n//birthday.getMilliseconds();  // 0\n//birthday.getTime();          // 333849600000 (for GMT)\n\n\nvar d = new Date();\nvar data = d.toLocaleString(\"de-DE\", \"short\").split(\",\");\nvar date = data[0];\nvar time = data[1];\n\nvar str =  \" \" + time + \"\\n\\n\";\n    str += \" Aussen:     \" + global.get(\"temp_outdoor\") + \"°C\\n\\n\"\n    str += \" Boiler:     \" + global.get(\"temp_boiler\") + \"°C\\n\\n\"\n    str += \" Heizung: \" + global.get(\"temp_outlet\") + \"°C\"\n    \nmsg.payload = str;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 480,
+        "y": 200,
+        "wires": [
+            [
+                "35c98043.052948",
+                "5c45e535.54f3cc"
+            ]
+        ]
+    },
+    {
+        "id": "35c98043.052948",
+        "type": "debug",
+        "z": "7c5cc928.09cb08",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 700,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "55e1bfcc.8987e8",
+        "type": "mqtt out",
+        "z": "7c5cc928.09cb08",
+        "name": "",
+        "topic": "tft/backlight",
+        "qos": "",
+        "retain": "",
+        "broker": "9758347b.d79898",
+        "x": 690,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "852737da.c3add",
+        "type": "sunrise",
+        "z": "7c5cc928.09cb08",
+        "name": "",
+        "lat": "47",
+        "lon": "-11",
+        "start": "dawn",
+        "end": "dusk",
+        "soff": 0,
+        "eoff": 0,
+        "x": 230,
+        "y": 400,
+        "wires": [
+            [],
+            [
+                "cb49ad82.24ad08"
+            ]
+        ]
+    },
+    {
+        "id": "cb49ad82.24ad08",
+        "type": "function",
+        "z": "7c5cc928.09cb08",
+        "name": "",
+        "func": "var sun = msg.payload;\n\nmsg.payload = 245 - sun * 245;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 460,
+        "y": 420,
+        "wires": [
+            [
+                "55e1bfcc.8987e8"
+            ]
+        ]
+    },
+    {
+        "id": "9758347b.d79898",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "localhost",
+        "port": "1883",
+        "clientid": "",
+        "usetls": false,
+        "compatmode": false,
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": ""
+    }
+]
