@@ -12,4 +12,16 @@ ESP8266 based MQTT client with TFT display for flush mount
   * Backlight dimming with PWM
   * OTA update (Over the air) (thanks to https://github.com/ayushsharma82/AsyncElegantOTA)
   
-  
+With cover
+
+<img src="doc/with_cover.jpg" width=50% height=50%>
+
+
+Without cover
+
+<img src="doc/no_cover.jpg" width=50% height=50%>
+
+
+Stl model for 3D printer
+
+<img src="doc/Cover_model.png" width=50% height=50%>
