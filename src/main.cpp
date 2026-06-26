@@ -7,6 +7,9 @@
 #include <TFT_eSPI.h>
 #include <SPI.h>
 #include "NotoSansBold15.h"
+#include "CalibriBold12.h"
+#include "CalibriBold16.h"
+#include "CalibriBold18.h"
 
 // ST7735 TFT module 128x160 connections
 // 1 - GND
@@ -22,14 +25,20 @@
 #define Dimmer D1
 
 // config wifi
-const char *ssid = "*********";
-const char *password = "********";
+const char *ssid = "ipfire";
+const char *password = "joseffranz";
 
 // config mqtt
 const char *mqtt_server = "192.168.123.105";
 
 TFT_eSPI tft = TFT_eSPI();
 #define AA_FONT_SMALL NotoSansBold15
+#define AA_FONT_1 CalibriBold12
+#define AA_FONT_2 CalibriBold16
+#define AA_FONT_3 CalibriBold18
+
+#define ST7735_BLACK 0x0000 /*   0,   0,   0 */
+#define ST7735_WHITE 0xFFFF /* 255, 255, 255 */
 
 WiFiClient wifiClient;
 PubSubClient mqttClient(wifiClient);
@@ -37,6 +46,45 @@ PubSubClient mqttClient(wifiClient);
 AsyncWebServer server(80);
 
 unsigned long last;
+
+typedef struct
+{
+  String key;
+  String value;
+} KeyValue;
+
+KeyValue keys[5];
+
+KeyValue ParseKeyValue(String s)
+{
+  KeyValue kv;
+  if(s.length() < 3) 
+    return kv;
+
+  int i = s.indexOf('=');
+  if (i == -1)
+    return kv;
+
+  kv.key = s.substring(0, i);
+  kv.value = s.substring(i + 1);
+  return kv;
+}
+
+// To test & debug
+void ParseMessage(String s, KeyValue kvs[])
+{
+  int l = s.length();
+  int n = 0;
+  int i = 0;
+  int j = s.indexOf('\n');
+  while (j != -1)
+  {
+    String row = s.substring(i,j);
+    kvs[n++] = ParseKeyValue(row);
+    i = j;
+    j = s.indexOf('\n', i);
+  }
+}
 
 void setupWifi()
 {
@@ -79,9 +127,10 @@ void callbackMqtt(String topic, byte *payload, unsigned int length)
 
   if (topic == "tft/text")
   {
-    tft.fillScreen(ST7735_BLACK);
     tft.setCursor(0, 8);
+    tft.setTextPadding(20);
     tft.print(msg);
+    // tft.drawRightString(msg, 50, 239, 1);
   }
   if (topic == "tft/backlight")
   {
@@ -100,6 +149,11 @@ void reconnectMqtt()
       Serial.println("connected");
       mqttClient.subscribe("tft/text");
       mqttClient.subscribe("tft/backlight");
+      tft.fillScreen(ST7735_BLACK);
+      tft.setCursor(5, 8);
+      tft.print("MQTT connected");
+      delay(3000);
+      tft.fillScreen(ST7735_BLACK);
     }
     else
     {
@@ -107,9 +161,9 @@ void reconnectMqtt()
       Serial.print(mqttClient.state());
       Serial.println(" try again in 5 seconds");
       tft.fillScreen(ST7735_BLACK);
-      tft.setCursor(10, 8);
+      tft.setCursor(5, 8);
       tft.print("MQTT lost !");
-      delay(5000);
+      delay(3000);
     }
   }
 }
@@ -120,7 +174,7 @@ void setup()
   pinMode(LED, OUTPUT);
   pinMode(Dimmer, OUTPUT);
   digitalWrite(Dimmer, HIGH);
-  //analogWrite(Dimmer, 128);
+  // analogWrite(Dimmer, 128);
 
   // serial
   Serial.begin(115200);
@@ -131,10 +185,10 @@ void setup()
   delay(100);
   tft.setRotation(2);
   tft.fillScreen(ST7735_BLACK);
-  tft.setTextColor(ST7735_WHITE, ST7735_BLACK);
-  tft.loadFont(AA_FONT_SMALL);
-  tft.setCursor(20, 20);
-  tft.print("Hello");
+  tft.setTextColor(ST7735_WHITE, ST7735_BLACK, true);
+  tft.loadFont(AA_FONT_2);
+  tft.setCursor(5, 20);
+  tft.print("ESP8266_MQTT4");
 
   // wifi
   setupWifi();
